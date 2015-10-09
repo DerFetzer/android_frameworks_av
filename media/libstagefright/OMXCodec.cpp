@@ -2298,6 +2298,22 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
             frameWidth,
             frameHeight,
             def.format.video.eColorFormat);
+#elif defined(ROCKCHIP_HARDWARE)
+    OMX_U32 frameWidth = def.format.video.nFrameWidth;
+    OMX_U32 frameHeight = def.format.video.nFrameHeight;
+
+    if (!strncmp("OMX.rk.", mComponentName, 7)) {
+        frameWidth = (def.format.video.nFrameWidth + 31) & (~31);
+        frameHeight = (def.format.video.nFrameHeight + 15) & (~15);
+
+        ALOGI("Rockchip codec --> width: %u, height: %u", frameWidth, frameHeight);
+    }
+
+    err = native_window_set_buffers_geometry(
+            mNativeWindow.get(),
+            frameWidth,
+            frameHeight,
+            def.format.video.eColorFormat);
 #else
     err = native_window_set_buffers_geometry(
             mNativeWindow.get(),
